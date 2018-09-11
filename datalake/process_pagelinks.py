@@ -17,7 +17,7 @@ hdfs_client = hdfs.client.InsecureClient("http://kube-node07:50070")
 with hdfs_client.read(sch, encoding='utf-8') as reader:
     schema = json.load(reader)
 
-if sys.argv[2] == 'prod':
+if sys.argv[2] == 'full':
     dst = dst_full
 else:
     dst = dst_test
@@ -39,20 +39,25 @@ with open(src) as f:
                 pl_namespace = int(pagelink[1])
                 pl_from_namespace = int(pagelink[len(pagelink)-1])
                 pl_title = ''
-                start = len(pagelink) - 2 - 1
+                start = 2
                 stop = len(pagelink) - 1
-                index = start
-                while index < stop:
-                    if index == start:
-                        pl_title = pagelink[index][1:]
-                    elif index == stop - 1:
-                        pl_title += "," + pagelink[index][:-1]
+                idx = start
+                while idx < stop:
+                    if idx == start:
+                        if idx == 2 and (idx == stop - 1):
+                            pl_title = pagelink[idx][1:-1]
+                        else:
+                            pl_title = pagelink[idx][1:]
+                    elif idx == stop - 1:
+                        pl_title += "," + pagelink[idx][:-1]
                     else:
-                        pl_title += "," + pagelink[index]
-                    index += 1
+                        pl_title += "," + pagelink[idx]
+                    idx += 1
                 pl_title = pl_title.replace('_', ' ')
                 pl_title = pl_title.replace('\\"', '')
                 pl_title = pl_title.replace("\\'", "'")
+                if pl_title[0] == "'" and pl_title[-1] == "'":
+                    pl_title = pl_title[1:-1]
                 pagelinks.append({
                     "pl_from": pl_from,
                     "pl_namespace": pl_namespace,
