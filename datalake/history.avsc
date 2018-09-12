@@ -24,7 +24,7 @@
                                 "type": "record",
                                 "fields": [
                                   {"name": "r_username", "type": "string", "default": "No name"},
-                                  {"name": "r_contributor_id", "type": ["null", "long"]},
+                                  {"name": "r_contributor_id", "type": "long", "default": -911},
                                   {"name": "r_contributor_ip", "type": ["null", "string"]}
                                 ]
                             }
