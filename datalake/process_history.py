@@ -37,9 +37,12 @@ with open(src) as f:
     tree = iterparse(f)
     for event, elem in tree:
         if "page" in elem.tag:
-            print(elem)
-            print(elem.find("title"))
-            sys.exit(0)
+            item = elem.iter()
+            for page in item:
+                toto = page.iter()
+                for titi in toto:
+                    print(titi.tag)
+                    sys.exit(0)
     #    for item in page:
     #        print(item)
     #        sys.exit(0)
