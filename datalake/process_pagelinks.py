@@ -25,6 +25,12 @@ else:
 limit = int(sys.argv[1])
 begining = "INSERT INTO `pagelinks` VALUES "
 
+
+def save_avro_file(filename, pagelinks):
+    with hdfs_client.write(filename) as avro_file:
+        fastavro.writer(avro_file, schema, pagelinks)
+
+
 with open(src) as f:
     index = 0
     pagelinkfileno = 0
@@ -56,8 +62,8 @@ with open(src) as f:
                 pl_title = pl_title.replace('_', ' ')
                 pl_title = pl_title.replace('\\"', '')
                 pl_title = pl_title.replace("\\'", "'")
-                if pl_title[0] == "'" and pl_title[-1] == "'":
-                    pl_title = pl_title[1:-1]
+                if len(pl_title) > 1 and pl_title[-1] == "\\" and pl_title[-2] == "\\":
+                    pl_title = pl_title[:-1]
                 pagelinks.append({
                     "pl_from": pl_from,
                     "pl_namespace": pl_namespace,
@@ -67,10 +73,12 @@ with open(src) as f:
 
             if index >= limit:
 
-                with hdfs_client.write('{}pagelinks.{}.avro'.format(dst, pagelinkfileno)) as avro_file:
-                    fastavro.writer(avro_file, schema, pagelinks)
+                save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)
                 index = 0
                 pagelinkfileno += 1
+                pagelinks = []
 
                 if not sys.argv[2] == 'prod':
                     sys.exit(0)
+    if len(pagelinks) > 0:
+        save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)
