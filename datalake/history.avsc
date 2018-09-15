@@ -15,7 +15,7 @@
                     "type": "record",
                     "fields": [
                         {"name": "r_id", "type": "long"},
-                        {"name": "r_parent_id", "type": "long"},
+                        {"name": "r_parent_id", "type": "long", "default": -911},
                         {"name": "r_timestamp", "type": "long"},
                         {
                             "name": "r_contributor",
