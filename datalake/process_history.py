@@ -91,9 +91,10 @@ with open(src) as xml_file:
                                     r_contributor_ip = contrib_child.text
                                     # print('Contrib IP: {}'.format(r_contributor_ip))
                             r_contributor = {
-                                'r_username': r_username,
                                 'r_contributor_ip': r_contributor_ip
                             }
+                            if None is not r_username:
+                                r_contributor['r_username'] = r_username
                             if None is not r_contributor_id:
                                 r_contributor['r_contributor_id'] = r_contributor_id
                             # print('\tRev Contrib: {}'.format(r_contributor))
@@ -110,10 +111,10 @@ with open(src) as xml_file:
                             r_format = rev_child.text
                             # print('\tRev Format: {}'.format(r_format))
                         elif rev_child.tag == QName(xmlns, 'text'):
-                            r_text = {
-                                'r_text_id': int(rev_child.get('id')),
-                                'r_text_bytes': int(rev_child.get('bytes'))
-                            }
+                            r_text = {'r_text_bytes': int(rev_child.get('bytes')) if None is not rev_child.get(
+                                          'bytes') else -911,
+                                      'r_text_id': int(rev_child.get('id')) if None is not rev_child.get(
+                                          'id') else -911}
                             # print('\tRev Text: {}'.format(r_text))
                         elif rev_child.tag == QName(xmlns, 'sha1'):
                             r_sha1 = rev_child.text
@@ -139,7 +140,6 @@ with open(src) as xml_file:
                 'h_revisions': h_revisions
             })
         if index > limit:
-            print(revisions)
             save_avro_file('{}revisions.{}.avro'.format(dst, revisionfileno), revisions)
             index = 0
             revisionfileno += 1

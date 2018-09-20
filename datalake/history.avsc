@@ -31,8 +31,8 @@
                         },
                         {"name": "r_minor", "type": ["null", "string"]},
                         {"name": "r_comment", "type": ["null", "string"]},
-                        {"name": "r_model", "type": "string"},
-                        {"name": "r_format", "type": "string"},
+                        {"name": "r_model", "type": ["null", "string"]},
+                        {"name": "r_format", "type": ["null", "string"]},
                         {
                             "name": "r_text",
                             "type": {
@@ -44,7 +44,7 @@
                                 ]
                             }
                         },
-                        {"name": "r_sha1", "type": "string"}
+                        {"name": "r_sha1", "type": ["null", "string"]}
                     ]
                 }
             }
