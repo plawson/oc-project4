@@ -17,12 +17,13 @@ hdfs_client = hdfs.client.InsecureClient("http://kube-node07:50070")
 with hdfs_client.read(sch, encoding='utf-8') as reader:
     schema = json.load(reader)
 
-if sys.argv[2] == 'full':
+if sys.argv[3] == 'full':
     dst = dst_full
 else:
     dst = dst_test
 
 limit = int(sys.argv[1])
+file_limit = int(sys.argv[2])
 begining = "INSERT INTO `pagelinks` VALUES "
 
 
@@ -78,7 +79,7 @@ with open(src) as f:
                 pagelinkfileno += 1
                 pagelinks = []
 
-                if not sys.argv[2] == 'prod':
+                if not sys.argv[2] == 'prod' and pagelinkfileno >= file_limit:
                     sys.exit(0)
     if len(pagelinks) > 0:
         save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)

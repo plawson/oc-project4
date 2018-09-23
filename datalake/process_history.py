@@ -18,12 +18,13 @@ hdfs_client = hdfs.client.InsecureClient("http://kube-node07:50070")
 with hdfs_client.read(sch, encoding='utf-8') as reader:
     schema = json.load(reader)
 
-if sys.argv[2] == 'full':
+if sys.argv[3] == 'full':
     dst = dst_full
 else:
     dst = dst_test
 
 limit = int(sys.argv[1])
+file_limit = int(sys.argv[2])
 
 
 def save_avro_file(filename, contributions):
@@ -145,7 +146,7 @@ with open(src) as xml_file:
             revisionfileno += 1
             revisions = []
 
-            if not sys.argv[2] == 'prod':
+            if not sys.argv[2] == 'prod' and revisionfileno >= file_limit:
                 sys.exit(0)
     if len(revisions) > 0:
         save_avro_file('{}revisions.{}.avro'.format(dst, revisionfileno), revisions)
