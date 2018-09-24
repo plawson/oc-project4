@@ -67,15 +67,17 @@ def filter_contributors(page_revs):
 # Load revision files
 rdd_avro_rv = sc.binaryFiles(src + avro_rv_pattern)  # (filename, content)
 # Parse avro revision files
-rdd_rv = rdd_avro_rv.flatMap(lambda rv: fastavro.reader(BytesIO(rv[1]), reader_schema=schema_rv))\
-    .flatMap(filter_contributors)
+rdd_page = rdd_avro_rv.flatMap(lambda rv: fastavro.reader(BytesIO(rv[1]), reader_schema=schema_rv)).persist()
+rdd_rv = rdd_page.flatMap(filter_contributors)
 # Convert to a RDD of revision rows
 rdd_rows_rv = rdd_rv.map(lambda rev: Row(**rev))
 # Convert to a dataframe of revisions
 df_rv = spark.createDataFrame(rdd_rows_rv)
 # Cache to avoid recomputation
-df_rv.persist()
+# df_rv.persist()
 
+crit = rdd_page.filter(lambda page: page['page_title'] == title)\
+    .map(lambda page: {'pid': page['page_id'], 'ptitle': page['page_title']}).collect()
 
 # Load pagelins files
 rdd_avro_pl = sc.binaryFiles(src + avro_pl_pattern)  # (filename, content)
@@ -87,7 +89,7 @@ rdd_rows_pl = rdd_pl.map(lambda pl: Row(**pl))
 # Convert to a dataframe of pagelinks
 df_pl = spark.createDataFrame(rdd_rows_pl)
 # Cache to avoid recomputation
-df_pl.persist()
+# df_pl.persist()
 
 # df_rv.limit(10).show()
 # df_pl.limit(10).show()
@@ -95,10 +97,19 @@ df_pl.persist()
 df_rv.createOrReplaceTempView("revision")
 df_pl.createOrReplaceTempView("pagelink")
 
+
 select_string = "SELECT rv.contributor contributeur, " \
-                "COUNT(rv.contributor) quantite FROM revision rv, pagelink pl " \
-                "WHERE rv.page_title = '{}' and (rv.page_id = pl.pl_from or " \
-                "rv.page_title = pl.pl_title) group by contributeur order by quantite desc".format(title)
+                "COUNT(rv.contributor) quantite FROM revision rv" \
+                "WHERE rv.page_title = '{0}' or rv.page_id in (SELECT pl_from FROM pagelink WHERE " \
+                "pl_title = '{0}')" \
+                "or rv.page_title in (SELECT pl_title FROM pagelink WHERE pl_from = {1}" \
+                "group by contributeur order by quantite desc"\
+    .format(crit[0]['ptitle'], crit[0]['pid'])
+
+# select_string = "SELECT rv.contributor contributeur, " \
+#                 "COUNT(rv.contributor) quantite FROM revision rv, pagelink pl " \
+#                 "WHERE rv.page_title = '{}' and rv.page_id = pl.pl_from group by contributeur " \
+#                 "order by quantite desc".format(title)
 
 result = spark.sql(select_string)
 result.limit(3).show()

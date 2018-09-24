@@ -22,8 +22,15 @@ else:
 
 filename = sys.argv[1]
 
+num = 0
+
 with hdfs_client.read(srcdir + filename) as avro_file:
     reader = fastavro.reader(avro_file, reader_schema=schema)
     for rev in reader:
-        print(rev)
-        sys.exit(0)
+        # print(rev)
+        if num < 10:
+            print('Revision size for page id {}: {}'.format(rev['h_id'], len(rev['h_revisions'])))
+        num += 1
+        # sys.exit(0)
+
+print('Number of pages in file: {}'.format(num))

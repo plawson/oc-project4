@@ -36,8 +36,14 @@ with open(src) as xml_file:
     revisions = []
     index = 1
     revisionfileno = 0
-    for event, elem in iterparse(xml_file):
-        if elem.tag == QName(xmlns, 'page'):
+    # Get an iterable
+    context = iterparse(xml_file, events=("start", "end"))
+    # Turn it into an iterator
+    context = iter(context)
+    # Get the root element
+    event, root = next(context)
+    for event, elem in context:
+        if event == 'end' and elem.tag == QName(xmlns, 'page'):
             index += 1
             # print(elem.tag)
             h_title = None
@@ -141,12 +147,16 @@ with open(src) as xml_file:
                 'h_revisions': h_revisions
             })
         if index > limit:
+            print('Clearing xml root element...', end='', flush=True)
+            root.clear()
+            print(' Saving {}revisions.{}.avro...'.format(dst, revisionfileno), end='', flush=True)
             save_avro_file('{}revisions.{}.avro'.format(dst, revisionfileno), revisions)
+            print(' Done.')
             index = 0
             revisionfileno += 1
             revisions = []
 
-            if not sys.argv[2] == 'prod' and revisionfileno >= file_limit:
+            if not sys.argv[3] == 'full' and revisionfileno >= file_limit:
                 sys.exit(0)
     if len(revisions) > 0:
         save_avro_file('{}revisions.{}.avro'.format(dst, revisionfileno), revisions)

@@ -73,13 +73,14 @@ with open(src) as f:
                 })
 
             if index >= limit:
-
+                print('Saving: {}pagelinks.{}.avro...'.format(dst, pagelinkfileno), end='', flush=True)
                 save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)
+                print(' Done.')
                 index = 0
                 pagelinkfileno += 1
                 pagelinks = []
 
-                if not sys.argv[2] == 'prod' and pagelinkfileno >= file_limit:
+                if not sys.argv[3] == 'full' and pagelinkfileno >= file_limit:
                     sys.exit(0)
     if len(pagelinks) > 0:
         save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)
