@@ -109,13 +109,15 @@ rdd_rows_pl_from_me = rdd_pl_from_me.map(lambda pl: Row(**pl))
 df_pl_to_me = spark.createDataFrame(rdd_rows_pl_to_me).persist()
 df_pl_from_me = spark.createDataFrame(rdd_rows_pl_from_me).persist()
 
+# Remove unused cache to free memory space on executors
 rdd_page.unpersist()
 
+# Create temporary views for SQL usage
 df_rv.createOrReplaceTempView("revision")
 df_pl_to_me.createOrReplaceTempView("pagelink_to_me")
 df_pl_from_me.createOrReplaceTempView("pagelink_from_me")
 
-
+# Build the select statement
 select_string = "SELECT rv.contributor contributeur, " \
                 "COUNT(rv.contributor) quantite FROM revision rv " \
                 "WHERE rv.page_title = '{}' or rv.page_id in (SELECT pl_from FROM pagelink_to_me) " \
@@ -123,5 +125,7 @@ select_string = "SELECT rv.contributor contributeur, " \
                 "group by contributeur order by quantite desc"\
     .format(crit[0]['ptitle'])
 
+# Create rge resulting dataframe
 result = spark.sql(select_string)
+# Get the top three contributors
 result.limit(3).show()
