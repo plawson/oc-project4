@@ -84,4 +84,6 @@ with open(src, 'rb') as f:
                 if not sys.argv[3] == 'full' and pagelinkfileno >= file_limit:
                     sys.exit(0)
     if len(pagelinks) > 0:
+        print('Saving {}pagelinks.{}.avro...'.format(dst, pagelinkfileno), end='', flush=True)
         save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)
+        print(' Done.')
