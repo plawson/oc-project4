@@ -37,7 +37,7 @@ with open(src, 'rb') as f:
     pagelinkfileno = 0
     pagelinks = []
     for lineb in f:
-        line = lineb.decode('utf-8', 'ignore')[:-1]
+        line = lineb.decode('utf-8', 'ignore')
         if line.startswith(begining):
             records = line[len(begining)+1:-3].split("),(")
             index += 1
