@@ -29,7 +29,8 @@ with hdfs_client.read(srcdir + filename) as avro_file:
     for rev in reader:
         # print(rev)
         if num < 10:
-            print('Revision size for page id {}: {}'.format(rev['h_id'], len(rev['h_revisions'])))
+            print('Revision size for page {} =>{})<=: {}'.format(rev['h_title'], rev['h_namespace'],
+                                                                 len(rev['h_revisions'])))
         num += 1
         # sys.exit(0)
 

@@ -32,11 +32,12 @@ def save_avro_file(filename, pagelinks):
         fastavro.writer(avro_file, schema, pagelinks)
 
 
-with open(src) as f:
+with open(src, 'rb') as f:
     index = 0
     pagelinkfileno = 0
     pagelinks = []
-    for line in f:
+    for lineb in f:
+        line = lineb.decode('utf-8', 'ignore')[:-1]
         if line.startswith(begining):
             records = line[len(begining)+1:-3].split("),(")
             index += 1
@@ -73,7 +74,7 @@ with open(src) as f:
                 })
 
             if index >= limit:
-                print('Saving: {}pagelinks.{}.avro...'.format(dst, pagelinkfileno), end='', flush=True)
+                print('Saving {}pagelinks.{}.avro...'.format(dst, pagelinkfileno), end='', flush=True)
                 save_avro_file('{}pagelinks.{}.avro'.format(dst, pagelinkfileno), pagelinks)
                 print(' Done.')
                 index = 0
