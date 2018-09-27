@@ -10,7 +10,7 @@ import json
 import sys
 
 # Setup context and session
-sc = SparkContext()
+sc = SparkContext(appName=sys.argv[1].replace(' ', '_'))
 spark = SparkSession.builder.getOrCreate()
 
 # Schema files
@@ -57,7 +57,8 @@ def filter_contributors(page_revs):
     for revision in page_revs['h_revisions']:
         if not revision['r_contributor']['r_contributor_id'] == -911 \
                 and not 'No name' == revision['r_contributor']['r_username']\
-                and not 'script de conversion' == revision['r_contributor']['r_username']:
+                and not 'script de conversion' == revision['r_contributor']['r_username']\
+                and 'bot' not in revision['r_contributor']['r_username'].lower():
             flatten_revs.append({
                 'page_id': page_id,
                 'page_title': page_title,
@@ -110,7 +111,7 @@ df_pl_to_me = spark.createDataFrame(rdd_rows_pl_to_me).persist()
 df_pl_from_me = spark.createDataFrame(rdd_rows_pl_from_me).persist()
 
 # Remove unused cache to free memory space on executors
-rdd_page.unpersist()
+# rdd_page.unpersist()
 
 # Create temporary views for SQL usage
 df_rv.createOrReplaceTempView("revision")
