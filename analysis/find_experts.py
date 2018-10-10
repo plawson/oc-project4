@@ -10,7 +10,7 @@ import json
 import sys
 
 # Setup context and session
-sc = SparkContext(appName=sys.argv[1].replace(' ', '_'))
+sc = SparkContext(appName=sys.argv[1])
 spark = SparkSession.builder.getOrCreate()
 
 # Schema files
@@ -40,14 +40,12 @@ with hdfs_client.read(sch_pl, encoding='utf-8') as reader:
     schema_pl = json.load(reader)
 
 # Setup test or full mode
-# if sys.argv[2] == 'full':
-#     src = src_full
-# else:
-#     src = src_test
+if sys.argv[2] == 'full':
+    src = src_full
+else:
+    src = src_test
 
-src = src_full
-
-title = sys.argv[1]
+title = sys.argv[1].replace('_', ' ')
 
 
 def filter_contributors(page_revs):
@@ -129,4 +127,24 @@ select_string = "SELECT rv.contributor contributeur, " \
 # Create rge resulting dataframe
 result = spark.sql(select_string)
 # Get the top three contributors
-result.limit(3).show()
+# result.limit(3).show()
+experts = result.limit(3).collect()
+
+print('\nPage Id: {}, Title: {}\n'.format(crit[0]['pid'], crit[0]['ptitle']))
+
+columns = ['Contributeur', 'Nb_révisions']
+contrib = []
+revis = []
+for row in experts:
+    contrib.append(row['contributeur'])
+    revis.append(row['quantite'])
+
+# noinspection PyTypeChecker
+data = [columns] + list(zip(contrib, revis))
+for i, d in enumerate(data):
+    line = '|'.join(str(x).ljust(20) for x in d)
+    print(line)
+    if i == 0 or i == 3:
+        print('-' * len(line))
+
+print('\n')
