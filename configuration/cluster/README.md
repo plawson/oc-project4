@@ -1,7 +1,7 @@
 # Server VMs
 
 ## kube-node07
-This is the master VM. It run the HDFS Namenode and the Yarn Resource Manager. It has complete Hadoop, Yarn and spark configuration.
+This is the master VM. It run the HDFS Namenode and the Yarn Resource Manager. It has a complete Hadoop, Yarn and spark configuration.
 ### Distribution
 The Hadoop distribution is installed in **/home/kubernetes/code/hadoop-2.8.4**.
 
